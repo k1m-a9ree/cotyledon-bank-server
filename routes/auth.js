@@ -13,11 +13,26 @@ const isLoggedIn = require('../middleware/isLoggedin');
 const validateRegister = (req, res, next) => {
     const registerSchema = Joi.object({
         user: Joi.object({
-            username: Joi.string().required(),
-            userid: Joi.string().required(),
-            password: Joi.string().required(),
-            housename: Joi.string().required(),
-            role: Joi.number().valid(0, 1).required()
+            username: Joi.string().required().messages({
+                'string.empty': '이름을 입력해주세요',
+                'any.required': '이름을 입력해주세요'
+            }),
+            userid: Joi.string().required().messages({
+                'string.empty': '아이디를 입력해주세요',
+                'any.required': '아이디를 입력해주세요'
+            }),
+            password: Joi.string().required().messages({
+                'string.empty': '비밀번호를 입력해주세요',
+                'any.required': '비밀번호를 입력해주세요'
+            }),
+            housename: Joi.string().required().messages({
+                'string.empty': '집 이름을 입력해주세요',
+                'any.required': '집 이름을 입력해주세요'
+            }),
+            role: Joi.number().valid(0, 1).required().messages({
+                'string.empty': '역할을 입력해주세요',
+                'any.required': '역할을 입력해주세요'
+            })
         }).required()
     });
     const { error } = registerSchema.validate(req.body);
@@ -35,7 +50,7 @@ router.post('/register', validateRegister, async (req, res) => {
 
     const idExist = await User.exists({ userid: input.userid });
     if (idExist) {
-        throw new ExpressError('id is already exist', 400);
+        throw new ExpressError('아이디가 이미 존재합니다', 400);
     }
 
     let house = await House.findOne({ housename: input.housename });
@@ -66,23 +81,42 @@ router.post('/register', validateRegister, async (req, res) => {
     res.json({ success: true });
 });
 
+const validateLogin = (req, res, next) => {
+    const registerSchema = Joi.object({
+        user: Joi.object({
+            userid: Joi.string().required().messages({
+                'string.empty': '아이디를 입력해주세요',
+                'any.required': '아이디를 입력해주세요'
+            }),
+            password: Joi.string().required().messages({
+                'string.empty': '비밀번호를 입력해주세요',
+                'any.required': '비밀번호를 입력해주세요'
+            })
+        }).required()
+    });
+    const { error } = registerSchema.validate(req.body);
 
-router.post('/login', async (req, res) => {
-    if (!req.body || !req.body.user) throw new ExpressError('input id and password', 400);
-    const { userid, password } = req.body.user;
-    if (!userid || !password) {
-        throw new ExpressError('input id and password', 400);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(', ');
+        throw new ExpressError(msg, 400);
+    } else {
+        next();
     }
+}
+
+router.post('/login', validateLogin, async (req, res) => {
+    const { userid, password } = req.body.user;
+
 
     const user = await User.findOne({ userid: userid }).populate('house');
 
     if (!user) {
-        throw new ExpressError('disaccord id or password', 401);
+        throw new ExpressError('아이디나 비밀번호가 일치하지 않습니다', 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        throw new ExpressError('disaccord id or password', 401);
+        throw new ExpressError('아이디나 비밀번호가 일치하지 않습니다', 401);
     }
 
     req.session.userid = user.userid;
@@ -106,7 +140,7 @@ router.post('/logout', async (req, res) => {
         res.clearCookie('connect.sid');
         res.json({ success: true });
     } catch (error) {
-        throw new ExpressError('logout failed', 500);
+        throw new ExpressError('로그아웃에 실패하였습니다', 500);
     }
 });
 

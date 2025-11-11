@@ -9,7 +9,7 @@ const MongoStore = require('connect-mongo');
 
 const apiRouter = require('./routes/api');
 
-
+const isProduction = process.env.ENVIRONMENT === 'production';
 
 
 connectMongoose();
@@ -23,7 +23,9 @@ async function connectMongoose() {
     }
 }
 
-app.set('trust proxy', 1);
+if (isProduction) {
+    app.set('trust proxy', 1);
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -39,9 +41,9 @@ app.use(session({
     saveUninitialized: false, 
     cookie: {
         httpOnly: true, 
-        secure: true,
+        secure: isProduction,
         maxAge: 1000 * 60 * 60 * 24,
-        sameSite: 'none'
+        sameSite: isProduction ? 'none' : 'lax'
     },
 
     store: MongoStore.create({
@@ -61,7 +63,7 @@ app.use('/api', apiRouter);
 
 
 app.use((err, req, res, next) => {
-    console.log(err);
+    if (!isProduction) { console.log(err); }
     const { message = 'oh no, Error!!', statusCode = 500 } = err;
     res.status(statusCode).json({ error: err, success: false });
 })
