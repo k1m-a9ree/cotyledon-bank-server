@@ -14,6 +14,7 @@ const financialProduct = Object.freeze({
         'growthStock', 'dividendStock'],
     /** 자유 예금 */
     demandDeposit: {
+        stage: 1,
         korean: '자유 예금',
         comment: '자유 입출금, 낮은 이자',
         interest: 0.02,
@@ -24,6 +25,7 @@ const financialProduct = Object.freeze({
     },
     /** 정기 예금 */
     fixedDeposit: { 
+        stage: 3,
         korean: '정기 예금',
         comment: '입출금 불가, 만기일 있음, 높은 이자',
         interest: 0.10,
@@ -33,6 +35,7 @@ const financialProduct = Object.freeze({
     }, 
     /** 자유 적금 */
     flexibleInstallmentSavings: { 
+        stage: 2,
         korean: '자유 적금',
         comment: '입금 자유, 출금 불가, 만기일 있음, 높은 이자',
         interest: 0.08,
@@ -42,6 +45,7 @@ const financialProduct = Object.freeze({
     },
     /** 정기 적금 */
     fixedInstallmentSavings: { 
+        stage: 4,
         korean: '정기 적금',
         comment: '정기적 입금(자동 이체), 출금 불가, 만기일 있음, 높은 이자',
         interest: 0.12,
@@ -51,6 +55,7 @@ const financialProduct = Object.freeze({
     },
     /** 성장주 */
     growthStock: { 
+        stage: 5,
         korean: '성장주',
         comment: '배당금 낮음, 변동율 높음',
         dividend: 0.005,
@@ -63,6 +68,7 @@ const financialProduct = Object.freeze({
     }, 
     /** 기대주 */
     dividendStock: { 
+        stage: 6,
         korean: '기대주',
         comment: '배당금 높음, 변동율 낮음',
         dividend: 0.07,

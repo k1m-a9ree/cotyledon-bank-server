@@ -54,6 +54,18 @@ router.get('/point', isLoggedIn, async (req, res) => {
     res.json({ success: true, point: child.point });
 })
 
+router.patch('/stage/:num', isLoggedIn, async (req, res) => {
+    if (req.session.role != 1) throw new ExpressError('아이가 아닙니다', 401);
+    const user = await User.findOne({ userid: req.session.userid });
+    const child = await Child.findOne({ user: user._id });
+    
+    const { num } = req.body;
+    if (child.stage + 1 != num) throw new ExpressError('이 단계를 깰 자격이 없습니다', 401);
+    child.stage = num;
+    await child.save();
+    res.json({ success: true });
+})
+
 router.patch('/:id', isLoggedIn, validatePoint, async (req, res) => {
     // 부모인지 확인
     if (req.session.role != 0) throw new ExpressError('you are not parent', 401);

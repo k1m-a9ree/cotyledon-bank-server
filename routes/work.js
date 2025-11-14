@@ -8,6 +8,7 @@ const Work = require('../models/Work');
 const House = require('../models/House');
 const Child = require('../models/Child');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const isLoggedIn = require('../middleware/isLoggedin');
 const ExpressError = require('../utils/ExpressError');
 
@@ -54,6 +55,11 @@ router.post('/', isLoggedIn, validateWork, async (req, res) => {
     const newWork = new Work({ ...req.body.work, house: house });
 
     await newWork.save();
+
+    const user = await User.findOne({ userid: req.session.userid });
+    const noti = new Notification({ user: user, content: `${ newWork.name }을 완료하였습니다`});
+    await noti.save();
+    
     res.json({ success: true, work: {
         id: newWork.id,
         name: newWork.name,

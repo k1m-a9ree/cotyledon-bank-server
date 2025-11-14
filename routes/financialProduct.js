@@ -59,14 +59,17 @@ const validateFinPro = (req, res, next) => {
     }
 }
 
-// 금융 상품 가입하기
 router.post('/', isLoggedin, validateFinPro, async (req, res) => {
     // 아이인지 확인
     if (req.session.role != 1) throw new ExpressError('you\'re not child', 401);
     const user = await User.findOne({ userid: req.session.userid });
     const child = await Child.findOne({ user: user._id });
 
-    // 새로운 상품 만들어서 저장
+    const { type } = req.body.financialProduct;
+    if (finProConfig[type].stage > child.stage) {
+        throw new ExpressError('아직 상품에 가입 할 수 없습니다', 401);
+    }
+
     const newFinPro = new FinancialProduct({
         ...req.body.financialProduct,
         child: child,
@@ -74,6 +77,12 @@ router.post('/', isLoggedin, validateFinPro, async (req, res) => {
         lasttime: Math.floor(Date.now() / (1000 * 60 * 60))
     });
     await newFinPro.save();
+    
+    const noti = new Notification({ 
+        user: user,
+        content: `${ finProConfig[type].korean } 가입이 완료되었습니다.`
+    });
+    await noti.save();
 
     res.json({
         success: true,
@@ -137,6 +146,9 @@ router.delete('/:productid', isLoggedin, async (req, res) => {
     child.point += product.point;
     await child.save();
     await product.deleteOne();
+
+    const noti = new Notification({ user: user, content: `${ finProConfig[product.type].korean } 해지가 완료되었습니다`});
+    await noti.save();
 
     res.json({ success: true });
 });

@@ -51,7 +51,7 @@ const update = async (req, res, next) => {
                 continue;
             }
         } else if (product.type === 'growthStock' || product.type === 'dividendStock') {
-            for (let i = product.lasttime + 1; i <= now; i++) {
+            for (let i = product.lasttime + 12; i <= now; i += 12) {
                 const { minChange, maxChange } = finProConfig[product.type];
                 const random = ( Math.random() * (maxChange - minChange) ) + minChange;
                 const share = Math.floor(product.share[product.share.length-1] + product.share[product.share.length-1] * random);

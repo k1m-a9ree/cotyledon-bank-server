@@ -10,6 +10,8 @@ const StoreProduct = require('../models/StoreProduct');
 const House = require('../models/House');
 const Child = require('../models/Child');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+
 const ExpressError = require('../utils/ExpressError');
 const isLoggedIn = require('../middleware/isLoggedin');
 
@@ -128,6 +130,9 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
     await child.save();
 
     const deletedProduct = await StoreProduct.findByIdAndDelete(product._id);
+
+    const noti = new Notification({ user: user, content: `${deletedProduct.name} 구매완료`});
+    await noti.save();
 
     res.json({ success: true });
 });
