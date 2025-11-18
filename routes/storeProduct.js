@@ -134,7 +134,7 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
     const noti = new Notification({ user: user, content: `${deletedProduct.name} 구매완료`});
     await noti.save();
 
-    res.json({ success: true });
+    res.json({ success: true, product: deletedProduct });
 });
 
 module.exports = router;

@@ -77,6 +77,9 @@ router.post('/', isLoggedin, validateFinPro, async (req, res) => {
         lasttime: Math.floor(Date.now() / (1000 * 60 * 60))
     });
     await newFinPro.save();
+
+    child.point -= newFinPro.point;
+    await child.save();
     
     const noti = new Notification({ 
         user: user,
@@ -125,8 +128,9 @@ router.patch('/:productid', isLoggedin, isChild, update, async (req, res) => {
             product.point = point;
         }
     }
-
+    
     await product.save();
+    await child.save();
     res.json({ success: true });
 });
 

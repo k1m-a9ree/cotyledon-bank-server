@@ -55,10 +55,6 @@ router.post('/', isLoggedIn, validateWork, async (req, res) => {
     const newWork = new Work({ ...req.body.work, house: house });
 
     await newWork.save();
-
-    const user = await User.findOne({ userid: req.session.userid });
-    const noti = new Notification({ user: user, content: `${ newWork.name }을 완료하였습니다`});
-    await noti.save();
     
     res.json({ success: true, work: {
         id: newWork.id,
@@ -97,9 +93,13 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
 
     child.point += work.salary;
     await child.save();
-
+    
     await work.deleteOne();
-    res.json({ success: true });
+
+    const noti = new Notification({ user: user, content: `${ work.name } 알바를 완료하였습니다`});
+    await noti.save();
+
+    res.json({ success: true, work: work });
 });
 
 

@@ -21,6 +21,10 @@ const FinancialProductSchema = new Schema({
         type: [Number],
         default: [100]
     },
+    next: { // 주식 투자 미래 용
+        type: Number,
+        default: 101
+    },
     child: {
         type: Schema.Types.ObjectId,
         ref: 'Child',
