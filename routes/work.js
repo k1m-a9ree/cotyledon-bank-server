@@ -16,7 +16,8 @@ const workSchema = Joi.object({
     work: Joi.object({
         name: Joi.string().required(),
         todo: Joi.string().required(),
-        salary: Joi.number().min(1).required()
+        salary: Joi.number().min(1).required(),
+        password: Joi.string().required()
     }).required()
 });
 
@@ -41,7 +42,8 @@ router.get('/', isLoggedIn, async (req, res) => {
             name: e.name,
             todo: e.todo,
             salary: e.salary,
-            id: e.id
+            id: e.id,
+            password: (req.session.role == 0 ? e.password : null)
         };
     });
 
@@ -60,7 +62,8 @@ router.post('/', isLoggedIn, validateWork, async (req, res) => {
         id: newWork.id,
         name: newWork.name,
         todo: newWork.todo,
-        salary: newWork.salary
+        salary: newWork.salary,
+        password: newWork.password
     } });
 });
 
@@ -79,7 +82,7 @@ router.delete('/:id/parent', isLoggedIn, async (req, res) => {
 });
 
 // 이거는 아이가 일 해서 지우는 delete임
-router.delete('/:id', isLoggedIn, async (req, res) => {
+router.post('/:id', isLoggedIn, async (req, res) => {
     if (req.session.role != 1) throw new ExpressError('you are not child', 401);
 
     const work = await Work.findById(req.params.id);
@@ -90,6 +93,10 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
 
     const user = await User.findOne({ userid: req.session.userid });
     const child = await Child.findOne({ user: user._id });
+
+    if (!req.body || !req.body.password) throw new ExpressError('비밀번호를 입력하세요', 400);
+
+    if (work.password != req.body.password) throw new ExpressError('비밀번호가 틀립니다. 다시 입력하세요', 400);
 
     child.point += work.salary;
     await child.save();

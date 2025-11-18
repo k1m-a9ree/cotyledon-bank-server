@@ -14,6 +14,10 @@ const WorkSchema = new Schema({
         type: Number,
         required: true
     },
+    password: {
+        type: String,
+        required: true 
+    },
     house: {
         type: Schema.Types.ObjectId,
         ref: 'House',
