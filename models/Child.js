@@ -16,7 +16,7 @@ const ChildSchema = new Schema({
     stage: {
         type: Number,
         required: true,
-        default: 0
+        default: -1
     }
 });
 

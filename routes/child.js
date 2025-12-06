@@ -7,9 +7,9 @@ const Joi = require('joi');
 const Child = require('../models/Child');
 const User = require('../models/User');
 const House = require('../models/House');
+const PointLog = require('../models/PointLog');
 const isLoggedIn = require('../middleware/isLoggedin');
 const ExpressError = require('../utils/ExpressError');
-const { compare } = require('bcrypt');
 
 const pointSchema = Joi.object({
     changedPoint: Joi.number().min(0).required()
@@ -50,8 +50,9 @@ router.get('/point', isLoggedIn, async (req, res) => {
     if (req.session.role != 1) throw new ExpressError('you are not child', 401);
     const user = await User.findOne({ userid: req.session.userid });
     const child = await Child.findOne({ user: user._id });
+    const pointLogs = (await PointLog.find({ child: child._id }).sort({ time: -1, createdAt: -1 }).limit(30)).reverse();
 
-    res.json({ success: true, point: child.point });
+    res.json({ success: true, point: child.point, pointLogs: pointLogs });
 })
 
 router.get('/stage', isLoggedIn, async (req, res) => {
