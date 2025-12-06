@@ -9,6 +9,8 @@ const House = require('../models/House');
 const Child = require('../models/Child');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const PointLog = require('../models/PointLog');
+
 const isLoggedIn = require('../middleware/isLoggedin');
 const ExpressError = require('../utils/ExpressError');
 
@@ -103,8 +105,11 @@ router.post('/:id', isLoggedIn, async (req, res) => {
     
     await work.deleteOne();
 
-    const noti = new Notification({ user: user, content: `${ work.name } 알바를 완료하였습니다`});
+    const noti = new Notification({ user: user, content: `${ work.name } 알바를 완료하였습니다`, time: Math.floor(Date.now() / (1000 * 60 * 60))});
     await noti.save();
+
+    const pointlog = new PointLog({ point: child.point, comment: `${ work.name } 알바비`, time: Math.floor(Date.now() / (1000 * 60 * 60)), child: child });
+    await pointlog.save();
 
     res.json({ success: true, work: work });
 });

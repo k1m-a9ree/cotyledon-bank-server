@@ -25,6 +25,14 @@ const FinancialProductSchema = new Schema({
         type: Number,
         default: 101
     },
+    comment: { // 주식 미래 예측 코멘트
+        type: String,
+        default: "회사가 잘 살고 있어요!"
+    },
+    principal: {
+        type: Number,
+        default: 0
+    },
     child: {
         type: Schema.Types.ObjectId,
         ref: 'Child',

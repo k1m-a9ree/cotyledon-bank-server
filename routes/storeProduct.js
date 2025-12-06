@@ -11,6 +11,7 @@ const House = require('../models/House');
 const Child = require('../models/Child');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const PointLog = require('../models/PointLog');
 
 const ExpressError = require('../utils/ExpressError');
 const isLoggedIn = require('../middleware/isLoggedin');
@@ -131,8 +132,10 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
 
     const deletedProduct = await StoreProduct.findByIdAndDelete(product._id);
 
-    const noti = new Notification({ user: user, content: `${deletedProduct.name} 구매완료`});
+    const noti = new Notification({ user: user, content: `${deletedProduct.name} 구매완료`, time: Math.floor(Date.now() / (1000 * 60 * 60))});
     await noti.save();
+
+    const point = new PointLog({ point: child.point, comment: `${ deletedProduct.name } 구매`, time: Math.floor(Date.now() / (1000 * 60 * 60)), child: child });
 
     res.json({ success: true, product: deletedProduct });
 });

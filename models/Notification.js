@@ -10,9 +10,13 @@ const NotificationSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    time: {
+        type: Number,
+        required: true
     }
 }, { timestamps: true });
 
-NotificationSchema.index({ createdAt: -1 });
+NotificationSchema.index({ time: -1, createdAt: -1 });
 const Notification = mongoose.model('Notification', NotificationSchema);
 module.exports = Notification;

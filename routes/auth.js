@@ -3,11 +3,13 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 
-const ExpressError = require('../utils/ExpressError');
 const User = require('../models/User');
 const House = require('../models/House');
 const Child = require('../models/Child');
 const Parent = require('../models/Parent');
+const PointLog = require('../models/PointLog');
+
+const ExpressError = require('../utils/ExpressError');
 const isLoggedIn = require('../middleware/isLoggedin');
 
 const validateRegister = (req, res, next) => {
@@ -76,6 +78,8 @@ router.post('/register', validateRegister, async (req, res) => {
     } else if (input.role == 1) {
         const newChild = new Child({ user: newUser });
         await newChild.save();
+        const newPointLog = new PointLog({ point: 0, comment: '시작!', time: Math.floor(Date.now() / (1000 * 60 * 60)), child: newChild });
+        await newPointLog.save();
     }
 
     res.json({ success: true });

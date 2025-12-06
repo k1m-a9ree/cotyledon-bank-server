@@ -9,7 +9,7 @@ const update = require('../middleware/update');
 
 router.get('/', isLoggedIn, update, async (req, res) => {
     const user = await User.findOne({ userid: req.session.userid });
-    const notifications = await Notification.find({ user: user._id }).sort({ createdAt: -1 }).limit(15);
+    const notifications = await Notification.find({ user: user._id }).sort({ time: -1, createdAt: -1 }).limit(15);
 
     res.json({
         success: true,

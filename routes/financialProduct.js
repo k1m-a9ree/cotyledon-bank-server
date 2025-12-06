@@ -1,5 +1,3 @@
-/** @todo 금융상품 crud 만들기 */
-
 const express = require('express');
 const router = express.Router();
 const Joi = require('joi');
@@ -11,6 +9,7 @@ const User = require('../models/User');
 const Child = require('../models/Child');
 const FinancialProduct = require('../models/FinancialProduct');
 const Notification = require('../models/Notification');
+const PointLog = require('../models/PointLog');
 
 const ExpressError = require('../utils/ExpressError');
 const isLoggedin = require('../middleware/isLoggedin');
@@ -24,11 +23,19 @@ router.get('/', isLoggedin, isChild, update, async (req, res) => {
     const products = await FinancialProduct.find({ child: child._id });
     res.json({
         success: true,
-        financialProducts: products.map((product) => ({
-            type: product.type,
-            id: product.id,
-            point: product.point
-        }))
+        financialProducts: products.map((product) => {
+            const share = product.share;
+            const newest = product.share.slice(0 > share.length-10 ? 0 : share.length-10, share.length);
+
+            return {
+                type: product.type,
+                id: product.id,
+                point: product.point,
+                share: newest,
+                comment: product.comment,
+                principal: product.principal
+            }
+        })
     })
 })
 
@@ -73,6 +80,7 @@ router.post('/', isLoggedin, validateFinPro, async (req, res) => {
     const newFinPro = new FinancialProduct({
         ...req.body.financialProduct,
         child: child,
+        principal: req.body.financialProduct.point,
         maketime: Math.floor(Date.now() / (1000 * 60 * 60)),
         lasttime: Math.floor(Date.now() / (1000 * 60 * 60))
     });
@@ -83,9 +91,15 @@ router.post('/', isLoggedin, validateFinPro, async (req, res) => {
     
     const noti = new Notification({ 
         user: user,
-        content: `${ finProConfig[type].korean } 가입이 완료되었습니다.`
+        content: `${ finProConfig[type].korean } 가입이 완료되었습니다.`,
+        time: Math.floor(Date.now() / (1000 * 60 * 60))
     });
     await noti.save();
+
+    if (newFinPro.point != 0) {
+        const pointlog = new PointLog({ point: child.point, comment: `${finProConfig[type].korean} 가입`, time: Math.floor(Date.now() / (1000 * 60 * 60)), child: child });
+        await pointlog.save();
+    }
 
     res.json({
         success: true,
@@ -131,6 +145,10 @@ router.patch('/:productid', isLoggedin, isChild, update, async (req, res) => {
     
     await product.save();
     await child.save();
+
+    const pointlog = new PointLog({ point: child.point, comment: `${finProConfig[product.type].korean} 입/출금`, time: Math.floor(Date.now() / (1000 * 60 * 60)), child: child });
+    await pointlog.save();
+
     res.json({ success: true });
 });
 
@@ -151,8 +169,17 @@ router.delete('/:productid', isLoggedin, async (req, res) => {
     await child.save();
     await product.deleteOne();
 
-    const noti = new Notification({ user: user, content: `${ finProConfig[product.type].korean } 해지가 완료되었습니다`});
+    const noti = new Notification({ 
+        user: user, 
+        content: `${ finProConfig[product.type].korean } 해지가 완료되었습니다`,
+        time: Math.floor(Date.now() / (1000 * 60 * 60))
+    });
     await noti.save();
+
+    if (product.point != 0) {
+        const pointlog = new PointLog({ point: child.point, comment: `${finProConfig[product.type].korean} 해지`, time: Math.floor(Date.now() / (1000 * 60 * 60)), child: child });
+        await pointlog.save();
+    }
 
     res.json({ success: true });
 });
