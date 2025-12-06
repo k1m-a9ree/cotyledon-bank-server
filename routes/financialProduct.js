@@ -81,6 +81,7 @@ router.post('/', isLoggedin, validateFinPro, async (req, res) => {
         ...req.body.financialProduct,
         child: child,
         principal: req.body.financialProduct.point,
+        share: [100],
         maketime: Math.floor(Date.now() / (1000 * 60 * 60)),
         lasttime: Math.floor(Date.now() / (1000 * 60 * 60))
     });
@@ -128,6 +129,9 @@ router.patch('/:productid', isLoggedin, isChild, update, async (req, res) => {
     if (!req.body || !req.body.financialProduct) throw new ExpressError('please input', 400);
     const { point } = req.body.financialProduct;
 
+    const diff = point - product.point;
+    product.principal += diff;
+
     if (product.point > point) {
         if (!finProConfig[product.type].canWithdraw) {
             throw new ExpressError('this product cant withdraw');
@@ -143,8 +147,6 @@ router.patch('/:productid', isLoggedin, isChild, update, async (req, res) => {
             product.point = point;
         }
     }
-
-    product.principal = product.point;
     
     await product.save();
     await child.save();
