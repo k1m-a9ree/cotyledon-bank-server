@@ -106,7 +106,8 @@ router.post('/', isLoggedin, validateFinPro, async (req, res) => {
         product: {
             type: newFinPro.type,
             id: newFinPro.id,
-            point: newFinPro.point
+            point: newFinPro.point,
+            share: newFinPro.share
         }
     })
 });
@@ -142,6 +143,8 @@ router.patch('/:productid', isLoggedin, isChild, update, async (req, res) => {
             product.point = point;
         }
     }
+
+    product.principal = product.point;
     
     await product.save();
     await child.save();
