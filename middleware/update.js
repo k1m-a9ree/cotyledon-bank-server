@@ -122,11 +122,11 @@ const update = async (req, res, next) => {
         
         if (finProConfig[product.type].maturity && now - product.maketime >= finProConfig[product.type].maturity) {
             newNoti.push({
-                commnet: `${finProConfig[product.type].korean}의 만기일이 지났습니다. 이자와 함께 돈을 받습니다.`,
+                comment: `${finProConfig[product.type].korean}의 만기일이 지났습니다. 이자와 함께 돈을 받습니다.`,
                 time: product.maketime + finProConfig[product.type].maturity
             });
             child.point += Math.floor(product.point + (product.point * finProConfig[product.type].interest));
-            newPtLg.push({ point: child.point, comment: `${ finProConfig[product.type].korean } 만기` ,time: i, child: child });
+            newPtLg.push({ point: child.point, comment: `${ finProConfig[product.type].korean } 만기` ,time: product.maketime + finProConfig[product.type].maturity, child: child });
             await product.deleteOne();
             continue;
         }
@@ -136,7 +136,7 @@ const update = async (req, res, next) => {
 
     await Notification.insertMany(newNoti.map((e) => ({
         user: user,
-        content: e.commnet,
+        content: e.comment,
         time: e.time
     })));
 
