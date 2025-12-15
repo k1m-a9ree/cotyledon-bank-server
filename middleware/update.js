@@ -77,18 +77,6 @@ const update = async (req, res, next) => {
                 product.point = Math.floor(product.point * random + product.point);
                 product.share.push(share);
                 product.next = next;
-
-                if (product.share[product.share.length-2] <= share) {
-                    newNoti.push({
-                        comment: `${finProConfig[product.type].korean}의 한 주 당 가격이 올랐습니다.`,
-                        time: i
-                    });
-                } else {
-                    newNoti.push({
-                        comment: `${finProConfig[product.type].korean}의 한 주 당 가격이 떨어졌습니다.`,
-                        time: i
-                    });
-                }
                 
                 if (random > 0) {
                     const randomComment = stockPositive[Math.floor(Math.random() * stockPositive.length)];
@@ -105,6 +93,36 @@ const update = async (req, res, next) => {
                         time: i
                     });
                     newPtLg.push({ point: child.point, comment: `${ finProConfig[product.type].korean } 배당금`, time: i, child: child });
+                }
+
+                product.lasttime = i;
+            }
+        } else if (product.type === 'gold' || product.type === 'property') {
+            for (let i = product.lasttime + 12; i <= now; i += 12) {
+                const { minChange, maxChange } = finProConfig[product.type];
+                const random = ( Math.random() * (maxChange - minChange) ) + minChange;
+                const share = product.next;
+                const next = Math.floor(share + share * random);
+
+                product.point = Math.floor(product.point * random + product.point);
+                product.share.push(share);
+                product.next = next;
+                
+                if (random > 0) {
+                    const randomComment = stockPositive[Math.floor(Math.random() * stockPositive.length)];
+                    product.comment = randomComment;
+                } else {
+                    const randomComment = stockNegative[Math.floor(Math.random() * stockNegative.length)];
+                    product.comment = randomComment;
+                }
+
+                if (product.type == 'property' && (i - product.maketime) % finProConfig[product.type].term == 0) {
+                    child.point += Math.floor(finProConfig[product.type].dividend * product.point);
+                    newNoti.push({
+                        comment: `${finProConfig[product.type].korean}의 임대 수익이 지급되었습니다.`,
+                        time: i
+                    });
+                    newPtLg.push({ point: child.point, comment: `${ finProConfig[product.type].korean } 임대 수익`, time: i, child: child });
                 }
 
                 product.lasttime = i;

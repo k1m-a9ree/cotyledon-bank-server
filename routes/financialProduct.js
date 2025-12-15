@@ -108,7 +108,8 @@ router.post('/', isLoggedin, validateFinPro, async (req, res) => {
             type: newFinPro.type,
             id: newFinPro.id,
             point: newFinPro.point,
-            share: newFinPro.share
+            share: newFinPro.share,
+            principal: newFinPro.principal
         }
     })
 });

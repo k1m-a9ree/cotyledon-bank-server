@@ -11,7 +11,7 @@
 const financialProduct = Object.freeze({
     enum: ['demandDeposit', 'flexibleInstallmentSavings', 
         'fixedDeposit', 'fixedInstallmentSavings',
-        'growthStock', 'dividendStock'],
+        'growthStock', 'dividendStock', 'gold', 'property'],
     /** 자유 예금 */
     demandDeposit: {
         stage: 1,
@@ -87,6 +87,36 @@ const financialProduct = Object.freeze({
         term: 12,
         minChange: -0.05,
         maxChange: 0.10,
+        maturity: null,
+        canDeposit: true,
+        canWithdraw: true
+    },
+    /** 금 */
+    gold: {
+        stage: 7,
+        rootType: '실물자산',
+        korean: '금',
+        comment: ['방어적'],
+        detail: [],
+        dividend: 0,
+        term: 12,
+        minChange: -0.05,
+        maxChange: 0.20,
+        maturity: null,
+        canDeposit: true,
+        canWithdraw: true
+    },
+    /** 부동산 */
+    property: {
+        stage: 8,
+        rootType: '실물자산',
+        korean: '부동산',
+        comment: ['월세 임대 수익', '낮은 변동성'],
+        detail: ['임대 수익 3%'],
+        dividend: 0.03,
+        term: 12,
+        minChange: -0.02,
+        maxChange: 0.08,
         maturity: null,
         canDeposit: true,
         canWithdraw: true
